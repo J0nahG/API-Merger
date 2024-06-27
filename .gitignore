@@ -1,0 +1,6 @@
+venv/
+*.json
+__pycache__/
+build/
+dist/
+.vscode
