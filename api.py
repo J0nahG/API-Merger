@@ -76,7 +76,7 @@ def format_url(url: str, id: str, name: str, sources: str):
             query_fields = query_string.split("&")
             for field in query_fields:
                 if field.startswith("id=") or field.startswith("name="):
-                    del query_fields[field]
+                    del query_fields[query_fields.index(field)]
 
             query_fields.append(f"id={id}")
             query_fields.append(f"name={name}")
