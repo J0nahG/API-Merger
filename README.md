@@ -4,7 +4,7 @@ A simple user-friendly application to combine multiple external antisnipers into
 ## Installation Instructions:
 
 ### As executable:
-Simply download the .exe and run it like any other application!
+Coming soon!
 
 ### As source code:
 Create a virtual environment
