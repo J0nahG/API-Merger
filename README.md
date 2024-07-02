@@ -7,7 +7,7 @@ A simple user-friendly application to combine multiple external antisnipers into
 Coming soon!
 
 ### As source code:
-Create a virtual environment
+In the directory where you downloaded the source code, create a virtual environment
 ```shell
 python -m venv venv
 ```
