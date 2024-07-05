@@ -64,13 +64,13 @@ class Main_Window(QMainWindow):
         super().__init__()
         self.api = API()
         self.setWindowTitle("API Merger")
-        self.setGeometry(100, 100, 500, 200)
+        self.setGeometry(100, 100, 560, 200)
 
         self.api_list_model = API_list_model()
 
         self.api_list_view = QListView(self)
         self.api_list_view.setModel(self.api_list_model)
-        self.api_list_view.setGeometry(10, 10, 480, 140)
+        self.api_list_view.setGeometry(10, 10, 540, 140)
         self.api_list_view.selectionModel().selectionChanged.connect(self.update_button_state)
 
         self.start_button = QPushButton("Start API", self)
@@ -88,8 +88,13 @@ class Main_Window(QMainWindow):
 
         self.delete_button = QPushButton("Delete", self)
         self.delete_button.setEnabled(False)
-        self.delete_button.setGeometry(340, 160, 100, 30)
+        self.delete_button.setGeometry(450, 160, 100, 30)
         self.delete_button.clicked.connect(self.delete)
+
+        self.edit_button = QPushButton("Edit", self)
+        self.edit_button.setEnabled(False)
+        self.edit_button.setGeometry(340, 160, 100, 30)
+        self.edit_button.clicked.connect(self.edit)
 
     def start(self):
         """
@@ -111,7 +116,7 @@ class Main_Window(QMainWindow):
         """
         Handles the add button being clicked.
         """
-        text, ok = QInputDialog.getText(self, "Input New URL", "Please input the URL you would like to add:")
+        text, ok = QInputDialog.getText(self, "Input New URL", f"Please input the URL you would like to add:\t\t\t\t{chr(160)}") # Adds whitespace at the end of the line to widen window
         if ok:
             if text.startswith('http'):
                 self.api_list_model.urls.append(text)
@@ -138,12 +143,32 @@ class Main_Window(QMainWindow):
                 self.api.kill_api()
                 self.api.start_api()
 
+    def edit(self):
+        """
+        Handles the edit button being clicked.
+        """
+        selected_indexes = self.api_list_view.selectedIndexes()
+        if selected_indexes:            
+            index = selected_indexes[0]
+            text, ok = QInputDialog.getText(self, "Edit URL", f"Input edited URL:\t\t\t\t\t\t\t{chr(160)}", text=f"{self.api_list_model.urls[index.row()]}") # Adds whitespace at the end of the line to widen window
+            if ok:
+                if text.startswith('http'):
+                    self.api_list_model.urls[index.row()] = text
+                    self.api_list_model.layoutChanged.emit()
+                    self.api_list_model.update_data()
+                    if self.api.api_process:
+                        self.api.kill_api()
+                        self.api.start_api()
+                else:
+                    QMessageBox.information(self, "Error", "Invalid URL! Must begin with 'http' or 'https'", QMessageBox.Ok)
+
     def update_button_state(self):
         """
-        Updates the state of the delete button (called when selection changes).
+        Updates the state of the edit and delete buttons (called when selection changes).
         """
         selected_indexes = self.api_list_view.selectedIndexes()
         self.delete_button.setEnabled(bool(selected_indexes))
+        self.edit_button.setEnabled(bool(selected_indexes))
 
 
 class API_list_model(QAbstractListModel):
