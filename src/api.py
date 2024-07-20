@@ -15,7 +15,10 @@ async def lifespan(app: FastAPI):
     try:
         with open('config.json', 'r') as config_file:
             config = json.load(config_file)
-            urls.extend(config['urls'])
+        for source in config["sources"]:
+            if source["enabled"] == True:
+                urls.append(source["url"])
+        # urls.extend([source["url"] for source in config["sources"]])
     except Exception:
         pass
     yield
