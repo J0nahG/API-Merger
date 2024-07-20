@@ -12,7 +12,7 @@ if sys.stderr is None:
 import uvicorn
 import multiprocessing
 from multiprocessing import Process
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QListView, QInputDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QListView, QInputDialog, QMessageBox, QMenu
 from PyQt5.QtCore import Qt, QAbstractListModel
 import qdarkstyle
 import json
@@ -72,6 +72,8 @@ class Main_Window(QMainWindow):
         self.api_list_view.setModel(self.api_list_model)
         self.api_list_view.setGeometry(10, 10, 540, 140)
         self.api_list_view.selectionModel().selectionChanged.connect(self.update_button_state)
+        self.api_list_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.api_list_view.customContextMenuRequested.connect(self.show_context_menu)
 
         self.start_button = QPushButton("Start API", self)
         self.start_button.setGeometry(10, 160, 100, 30)
@@ -95,6 +97,28 @@ class Main_Window(QMainWindow):
         self.edit_button.setEnabled(False)
         self.edit_button.setGeometry(340, 160, 100, 30)
         self.edit_button.clicked.connect(self.edit)
+
+    def show_context_menu(self, pos):
+        """
+        Called when the user right clicks in api_list_view.
+        """
+        index = self.api_list_view.indexAt(pos)
+        if index.isValid(): # If the user right clicked on an item
+            menu = QMenu(self)
+
+            edit_option = menu.addAction('Edit')
+            edit_option.triggered.connect(self.edit)
+
+            delete_option = menu.addAction('Delete')
+            delete_option.triggered.connect(self.delete)
+
+            move_up_option = menu.addAction('Move Up')
+            move_up_option.triggered.connect(self.move_up)
+
+            move_down_option = menu.addAction('Move Down')
+            move_down_option.triggered.connect(self.move_down)
+
+            menu.exec_(self.mapToGlobal(pos))
 
     def start(self):
         """
@@ -120,8 +144,7 @@ class Main_Window(QMainWindow):
         if ok:
             if text.startswith('http'):
                 self.api_list_model.urls.append(text)
-                self.api_list_model.layoutChanged.emit()
-                self.api_list_model.update_data()
+                self.api_list_model.update()
                 if self.api.api_process:
                     self.api.kill_api()
                     self.api.start_api()
@@ -136,8 +159,7 @@ class Main_Window(QMainWindow):
         if selected_indexes:
             index = selected_indexes[0]
             del self.api_list_model.urls[index.row()]
-            self.api_list_model.layoutChanged.emit()
-            self.api_list_model.update_data()
+            self.api_list_model.update()
             self.api_list_view.clearSelection()
             if self.api.api_process:
                 self.api.kill_api()
@@ -154,13 +176,32 @@ class Main_Window(QMainWindow):
             if ok:
                 if text.startswith('http'):
                     self.api_list_model.urls[index.row()] = text
-                    self.api_list_model.layoutChanged.emit()
-                    self.api_list_model.update_data()
+                    self.api_list_model.update()
                     if self.api.api_process:
                         self.api.kill_api()
                         self.api.start_api()
                 else:
                     QMessageBox.information(self, "Error", "Invalid URL! Must begin with 'http' or 'https'", QMessageBox.Ok)
+
+    def move_up(self):
+        """
+        Moves the selected row up 1 position in the table.
+        """
+        selected_indexes = self.api_list_view.selectedIndexes()
+        if selected_indexes:
+            index = selected_indexes[0].row()
+            self.api_list_model.urls.insert(index - 1, self.api_list_model.urls.pop(index))
+            self.api_list_model.update()
+
+    def move_down(self):
+        """
+        Moves the selected row down 1 position in the table.
+        """
+        selected_indexes = self.api_list_view.selectedIndexes()
+        if selected_indexes:
+            index = selected_indexes[0].row()
+            self.api_list_model.urls.insert(index + 1, self.api_list_model.urls.pop(index))
+            self.api_list_model.update()
 
     def update_button_state(self):
         """
@@ -197,10 +238,11 @@ class API_list_model(QAbstractListModel):
     def rowCount(self, index):
         return len(self.urls)
 
-    def update_data(self):
+    def update(self):
         """
         Updates config.json to reflect changes in the list of URLs
         """
+        self.layoutChanged.emit()
         self.config["urls"] = self.urls
         with open("config.json", "w") as config_file:
             json.dump(self.config, config_file)
