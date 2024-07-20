@@ -4,7 +4,8 @@ A simple user-friendly application to combine multiple external antisnipers into
 ## Installation Instructions:
 
 ### As executable:
-Coming soon!
+* Find the latest release on the releases page and download API-Merger.exe
+* Double click on the executable to run it (yes, it is that simple)
 
 ### As source code:
 In the directory where you downloaded the source code, create a virtual environment
