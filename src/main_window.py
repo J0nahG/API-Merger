@@ -103,7 +103,7 @@ class Main_Window(QMainWindow):
         text, ok = QInputDialog.getText(self, "Input New URL", f"Please input the URL you would like to add:\t\t\t\t{chr(160)}") # Adds whitespace at the end of the line to widen window
         if ok:
             if text.startswith('http'):
-                self.api_list_model.sources.append({"url": text})
+                self.api_list_model.sources.append({"url": text, "enabled": True})
                 self.api_list_model.update()
             else:
                 QMessageBox.information(self, "Error", "Invalid URL! Must begin with 'http' or 'https'", QMessageBox.Ok)
