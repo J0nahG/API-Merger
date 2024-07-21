@@ -117,9 +117,18 @@ class Main_Window(QMainWindow):
         selected_indexes = self.api_list_view.selectedIndexes()
         if selected_indexes:
             index = selected_indexes[0]
-            del self.api_list_model.sources[index.row()]
-            self.api_list_model.update()
-            self.api_list_view.clearSelection()
+            url = self.api_list_model.sources[index.row()]["url"].split("?")[0] + "..."
+            reply = QMessageBox.question(
+                self,
+                "Confirm Delete",
+                f"Are you sure you want to delete the URL:\n{url}?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if reply == QMessageBox.Yes:
+                del self.api_list_model.sources[index.row()]
+                self.api_list_model.update()
+                self.api_list_view.clearSelection()
 
     def edit(self):
         """
