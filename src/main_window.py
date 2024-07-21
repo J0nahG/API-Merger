@@ -64,11 +64,13 @@ class Main_Window(QMainWindow):
             delete_option = menu.addAction('Delete')
             delete_option.triggered.connect(self.delete)
 
-            move_up_option = menu.addAction('Move Up')
-            move_up_option.triggered.connect(self.move_up)
+            if index.row() > 0:
+                move_up_option = menu.addAction('Move Up')
+                move_up_option.triggered.connect(self.move_up)
 
-            move_down_option = menu.addAction('Move Down')
-            move_down_option.triggered.connect(self.move_down)
+            if index.row() < len(self.api_list_model.sources) - 1:
+                move_down_option = menu.addAction('Move Down')
+                move_down_option.triggered.connect(self.move_down)
 
             if self.api_list_model.sources[index.row()]["enabled"] == True:
                 disable_option = menu.addAction('Disable')
@@ -126,7 +128,7 @@ class Main_Window(QMainWindow):
         selected_indexes = self.api_list_view.selectedIndexes()
         if selected_indexes:            
             index = selected_indexes[0]
-            text, ok = QInputDialog.getText(self, "Edit URL", f"Input edited URL:\t\t\t\t\t\t\t{chr(160)}", text=f"{self.api_list_model.sources[index.row()]["url"]}") # Adds whitespace at the end of the line to widen window
+            text, ok = QInputDialog.getText(self, "Edit URL", f"Input edited URL:\t\t\t\t\t\t\t{chr(160)}", text=self.api_list_model.sources[index.row()]["url"]) # Adds whitespace at the end of the line to widen window
             if ok:
                 if text.startswith('http'):
                     self.api_list_model.sources[index.row()]["url"] = text
