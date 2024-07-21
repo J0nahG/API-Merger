@@ -221,7 +221,7 @@ class API_list_model(QAbstractListModel):
             if self.sources[index.row()]["enabled"] == True:
                 return self.sources[index.row()]["url"].split("?")[0] + "..."
             else:
-                return f"(disabled) {self.sources[index.row()]["url"].split("?")[0]}..."
+                return f"(disabled) {self.sources[index.row()]['url'].split('?')[0]}..."
 
     def rowCount(self, index):
         return len(self.sources)
