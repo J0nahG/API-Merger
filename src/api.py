@@ -32,7 +32,9 @@ async def cubelify_endpoint(id: str, name: str, sources: str, request: Request):
     """
     formatted_urls = [format_url(url=url, id=id, name=name, sources=sources) for url in urls]
     headers = dict(request.headers)
-    del headers['host']
+    headers.pop('accept-encoding', None)
+    headers.pop('host', None)
+    
     cubelify_response = {"score":{"value":0,"mode":"add"},"tags":[]}
     tasks = [api_worker(url=url, headers=headers) for url in formatted_urls]
     api_responses = await asyncio.gather(*tasks)
